@@ -8,8 +8,10 @@ nobody may remove someone else's lock (OSHA lockout/tagout, 29 CFR 1910.147). A 
 same way: 5 of its 7 locks belong to someone else (three recommenders, the registrar, ETS).
 
 The lock screen is that switch. Each milestone is a padlock with a tag: red for **their key**, yellow for **your
-key**. Rubber stamps track each lock day by day (ordered, invited, nudged ×2), today's job lights up its lock, a flip
-counter counts down to your own submit date, and the switch flips to ON the morning after you submit.
+key**. Rubber stamps track each lock day by day (agreed, packet sent, invited, nudged ×2), today's lock gets a TODAY
+tape, a flip counter counts down to your own submit date, and the switch flips to ON the morning after you submit.
+A lock reads DUE TODAY on its due date and OVERDUE after it; it only comes off on the day you enter for its key
+coming back. (The example shows one sample run in which the locks started first come back first.)
 
 ## The example plan
 Six CS master's/PhD programs due Tue Dec 15 2026, planned backward with Gemini: start every lock someone else holds

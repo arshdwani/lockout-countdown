@@ -84,7 +84,7 @@
   input, select, textarea { font: inherit; font-size: 16px; color: #fff; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-width: 0; width: 100%; }
   textarea { min-height: 220px; font-family: ui-monospace, Menlo, monospace; font-size: 14px; line-height: 1.5; }
   input:focus, select:focus, textarea:focus { outline: 3px solid var(--y); outline-offset: 1px; }
-  .lockrow { display: grid; grid-template-columns: 1.1fr 1.1fr .8fr 2.2fr .9fr auto; gap: 10px; align-items: end; padding: 12px; border-radius: 14px; background: #181b21; border: 1px solid var(--line); margin-top: 10px; }
+  .lockrow { display: grid; grid-template-columns: 1fr 1fr .8fr 2fr .9fr .9fr auto; gap: 10px; align-items: end; padding: 12px; border-radius: 14px; background: #181b21; border: 1px solid var(--line); margin-top: 10px; }
   .lockrow .del { all: unset; cursor: pointer; color: var(--muted); padding: 10px; border-radius: 8px; }
   .lockrow .del:hover { color: #fff; background: var(--panel2); }
   ol.steps { margin: 0; padding-left: 22px; color: #cfd5dc; }
@@ -140,12 +140,13 @@
     <div class="how">
       <div class="card"><h3><span class="n">1</span> One switch</h3><p>The deadline is a switch held at OFF. It can only flip to ON when every padlock is off the lockout bar: the real rule from OSHA's lockout/tagout standard (29 CFR 1910.147).</p></div>
       <div class="card"><h3><span class="n">2</span> One lock per keyholder</h3><p>Every milestone is a padlock with a tag. <b style="color:#ff6a6a">Red: their key</b> (recommenders, the registrar, ETS). <b style="color:var(--y)">Yellow: your key</b>. You can't take someone else's lock off, so their locks start first and get nudge days.</p></div>
-      <div class="card"><h3><span class="n">3</span> A new frame every day</h3><p>Rubber stamps track each lock (ordered, invited, nudged ×2), today's job lights up its lock, a flip counter counts down, and the switch turns ON the morning after you submit.</p></div>
+      <div class="card"><h3><span class="n">3</span> A new frame every day</h3><p>Rubber stamps track each lock (ordered, invited, nudged ×2), today's lock gets a TODAY tape, a lock reads DUE TODAY on its date and OVERDUE after it, and comes off only when you enter the day its key came back. The switch turns ON after you submit.</p></div>
     </div>
   </section>
 
   <section>
     <h2>The plan (worked out with Gemini)</h2>
+    <p class="small" style="margin-top:-4px">Due dates and daily tasks come from Gemini's plan. The <b>Back</b> column is one sample run, so the frames can show keys coming back early: the locks started first came back first.</p>
     <div class="tablewrap"><table id="locktable"></table></div>
     <div class="block tablewrap"><table id="daytable"></table></div>
   </section>
@@ -161,7 +162,8 @@
         <label>Real deadline<input name="deadline" type="date" required></label>
       </div>
       <div id="lockrows"></div>
-      <div class="row block"><button class="btn" id="addlock" type="button">+ Add a lock</button><span class="small">Up to 7 locks. Stamps are dated words that show on the tag the day after, like <code>11/21 ASKED, 11/30 NUDGED</code>.</span></div>
+      <div class="row block"><button class="btn" id="addlock" type="button">+ Add a lock</button><span class="small">Up to 7 locks. Stamps are dated words that show on the tag the day after, like <code>11/21 ASKED, 11/30 NUDGED</code>. Keep names short (they print big): <code>LEE</code>, <code>REGISTRAR</code>.</span></div>
+      <label class="block small" style="display:flex;gap:10px;align-items:center"><input type="checkbox" name="assume" style="width:auto"> Until you fill in "Key back on", draw each lock as coming off on its due date (a preview of the plan). Untick it to track reality: a lock past its due date stays on and says OVERDUE.</label>
       <label class="block">One task a day (optional; empty days get a task from the locks)<textarea name="days" spellcheck="false"></textarea></label>
     </form>
     <div class="row block"><button class="btn primary" id="apply">Make my lockout</button><button class="btn" id="copy">Copy the link</button><button class="btn" id="reset">Back to the example</button><span class="small" id="copied" aria-live="polite"></span></div>
@@ -228,10 +230,11 @@
     $("dlabel").textContent = nice(date);
     const st = lockoutState(plan, date), V = (plan.verb || "SUBMIT").toLowerCase();
     const back = st.locks.filter(l => l.off).length;
-    $("status").innerHTML = st.submitted ? `<b>Switch ON.</b> All ${st.locks.length} keys back; ${V} done on ${nice(plan.submit)}.`
+    $("status").innerHTML = st.blocked ? `<b>${V[0].toUpperCase() + V.slice(1)} blocked.</b> ${st.locks.length - back} lock${st.locks.length - back === 1 ? "" : "s"} still on · today: ${escH(st.task)}` : st.submitted ? `<b>Switch ON.</b> All ${st.locks.length} keys back; ${V} done on ${nice(plan.submit)}.`
       : `<b>${st.submitDay ? `${V[0].toUpperCase() + V.slice(1)} today.` : `${st.toSubmit} day${st.toSubmit === 1 ? "" : "s"} to ${V}.`}</b> ${back} of ${st.locks.length} locks off · today: ${escH(st.task || "—")}`;
-    const stateLine = L => L.off ? `back ${nice(L.offDate)}` : L.offToday ? "comes off today" : L.last ? `${L.last[1].toLowerCase()} ${nice(L.last[0]).replace(/^\w+, /, "")}` : L.next ? `starts ${nice(L.next[0]).replace(/^\w+, /, "")}` : "waiting";
-    $("keys").innerHTML = st.locks.map(L => `<div class="key ${L.theirs ? "" : "yours"} ${L.off ? "off" : ""}"><div class="w">${L.off ? "Key back" : L.theirs ? "Their key" : "Your key"}${st.focus.has(L.id) && !L.off && !st.submitted ? " · today" : ""}</div><div class="h">${escH(L.holder)}</div><div class="s">${escH(L.what)} · ${escH(stateLine(L))}</div><div class="s" style="color:var(--muted)">off by ${nice(L.offDate)}</div></div>`).join("");
+    const short = d => nice(d).replace(/^\w+, /, "");
+    const stateLine = L => L.off ? (L.assumed ? `off by plan ${short(L.back)}` : `back ${short(L.back)}`) : L.overdue ? "overdue: chase it" : L.dueToday ? "due today" : L.last ? `${L.last[1].toLowerCase()} ${short(L.last[0])}` : L.next ? `starts ${short(L.next[0])}` : "waiting";
+    $("keys").innerHTML = st.locks.map(L => `<div class="key ${L.theirs ? "" : "yours"} ${L.off ? "off" : ""}"><div class="w">${L.off ? "Key back" : L.theirs ? "Their key" : "Your key"}${st.focus.has(L.id) && !L.off && !st.submitted ? " · today" : ""}</div><div class="h">${escH(L.holder)}</div><div class="s">${escH(L.what)} · ${escH(stateLine(L))}</div><div class="s" style="color:var(--muted)">due ${short(L.due)}</div></div>`).join("");
   }
 
   function buildMeta() {
@@ -240,10 +243,10 @@
   }
 
   function buildTables() {
-    let h = `<tr><th>#</th><th>Lock</th><th>Key</th><th>Stamps</th><th>Off by</th></tr>`;
+    let h = `<tr><th>#</th><th>Lock</th><th>Key</th><th>Stamps</th><th>Due</th><th>Back</th></tr>`;
     plan.locks.forEach((L, k) => {
       h += `<tr><td class="d">${k + 1}</td><td><b>${escH(L.holder)}</b> · ${escH(L.what)}</td><td><span class="pill" style="background:${L.theirs ? "#d4232b" : "#f4bd12"};color:${L.theirs ? "#fff" : "#161200"}">${L.theirs ? "THEIRS" : "YOURS"}</span></td>
-        <td>${(L.steps || []).map(s => `${nice(s[0]).replace(/^\w+, /, "")} ${escH(s[1].toLowerCase())}`).join(" · ")}</td><td class="d">${nice(L.off)}</td></tr>`;
+        <td>${(L.steps || []).map(s => `${nice(s[0]).replace(/^\w+, /, "")} ${escH(s[1].toLowerCase())}`).join(" · ")}</td><td class="d">${nice(L.due)}</td><td class="d">${L.back ? nice(L.back) : "—"}</td></tr>`;
     });
     $("locktable").innerHTML = h;
     let d = `<tr><th>Day</th><th>Task</th><th>Counter</th></tr>`;
@@ -269,7 +272,8 @@
       <label>What<input name="what" maxlength="18" value="${escH(L.what)}"></label>
       <label>Whose key<select name="theirs"><option value="1"${L.theirs ? " selected" : ""}>Theirs</option><option value="0"${L.theirs ? "" : " selected"}>Yours</option></select></label>
       <label class="stamps">Stamps<input name="steps" value="${escH((L.steps || []).map(s => md(s[0]) + " " + s[1]).join(", "))}"></label>
-      <label>Off by<input name="off" type="date" value="${L.off}"></label>
+      <label>Due<input name="due" type="date" value="${L.due || ""}"></label>
+      <label>Key back on<input name="back" type="date" value="${L.back || ""}"></label>
       <button class="del" type="button" aria-label="Remove this lock">✕</button></div>`;
   }
   function fillForm() {
@@ -278,6 +282,7 @@
     f.start.value = plan.start; f.submit.value = plan.submit; f.deadline.value = plan.deadline;
     $("lockrows").innerHTML = plan.locks.map(lockRow).join("");
     f.days.value = Object.entries(plan.days || {}).map(([d, t]) => `${md(d)} ${t[0]}`).join("\n");
+    f.assume.checked = plan.assumeOnTime !== false;
     wireRows();
   }
   function wireRows() {
@@ -286,7 +291,7 @@
   $("addlock").onclick = () => {
     const n = document.querySelectorAll(".lockrow").length; if (n >= 7) return;
     const f = $("mine");
-    $("lockrows").insertAdjacentHTML("beforeend", lockRow({ holder: "", what: "", theirs: true, steps: [], off: f.submit.value || plan.submit }, n));
+    $("lockrows").insertAdjacentHTML("beforeend", lockRow({ holder: "", what: "", theirs: true, steps: [], due: f.submit.value || plan.submit, back: "" }, n));
     wireRows();
   };
   const PAST = { SUBMIT: "SUBMITTED", APPLY: "APPLIED", LAUNCH: "LAUNCHED", SHIP: "SHIPPED", FILE: "FILED", START: "STARTED" };
@@ -299,13 +304,13 @@
     const locks = [...document.querySelectorAll(".lockrow")].map((r, k) => {
       const q = n => r.querySelector(`[name=${n}]`).value.trim();
       const steps = q("steps").split(",").map(x => x.trim()).filter(Boolean).map(x => { const m = x.match(/^(\d{1,2}\/\d{1,2})\s+(.+)$/); const d = m && fromMD(m[1], start); return d ? [d, m[2].toUpperCase().slice(0, 14)] : null; }).filter(Boolean).sort((a, b) => a[0] < b[0] ? -1 : 1);
-      return { id: "l" + (k + 1), holder: (q("holder") || `LOCK ${k + 1}`).toUpperCase(), what: (q("what") || "").toUpperCase(), theirs: q("theirs") === "1", off: q("off") || submit, steps };
-    }).sort((a, b) => a.off < b.off ? -1 : a.off > b.off ? 1 : 0);
+      return { id: "l" + (k + 1), holder: (q("holder") || `LOCK ${k + 1}`).toUpperCase(), what: (q("what") || "").toUpperCase(), theirs: q("theirs") === "1", due: q("due") || submit, back: q("back") || "", steps };
+    }).sort((a, b) => a.due < b.due ? -1 : a.due > b.due ? 1 : 0);
     const old = plan.days || {}, days = {};
     f.days.value.split("\n").forEach(line => { const m = line.match(/^\s*(\d{1,2}\/\d{1,2})\s+(.+?)\s*$/); const d = m && fromMD(m[1], start);
       if (d && d >= start && d <= deadline) { const t = m[2].slice(0, 34); days[d] = old[d] && old[d][0] === t && old[d].length > 1 ? old[d] : [t]; } });
     const verb = f.verb.value;
-    return { goal: f.goal.value.trim() || "My deadline", verb, done: PAST[verb] || verb + "ED", start, submit, deadline, locks, days };
+    return { goal: f.goal.value.trim() || "My deadline", verb, done: PAST[verb] || verb + "ED", scope: "", start, submit, deadline, locks, days, assumeOnTime: f.assume.checked };
   }
 
   // ---- downloads ----
