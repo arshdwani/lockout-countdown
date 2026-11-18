@@ -230,7 +230,7 @@
     $("dlabel").textContent = nice(date);
     const st = lockoutState(plan, date), V = (plan.verb || "SUBMIT").toLowerCase();
     const back = st.locks.filter(l => l.off).length;
-    $("status").innerHTML = st.blocked ? `<b>${V[0].toUpperCase() + V.slice(1)} blocked.</b> ${st.locks.length - back} lock${st.locks.length - back === 1 ? "" : "s"} still on · today: ${escH(st.task)}` : st.submitted ? `<b>Switch ON.</b> All ${st.locks.length} keys back; ${V} done on ${nice(plan.submit)}.`
+    $("status").innerHTML = st.blocked ? `<b>${V[0].toUpperCase() + V.slice(1)} blocked.</b> ${st.locks.length - back} lock${st.locks.length - back === 1 ? "" : "s"} still on · today: ${escH(st.task)}` : st.submitted ? `<b>Switch ON.</b> All ${st.locks.length} locks off; ${(plan.done || "submitted").toLowerCase()} on ${nice(plan.submit)}.`
       : `<b>${st.submitDay ? `${V[0].toUpperCase() + V.slice(1)} today.` : `${st.toSubmit} day${st.toSubmit === 1 ? "" : "s"} to ${V}.`}</b> ${back} of ${st.locks.length} locks off · today: ${escH(st.task || "—")}`;
     const short = d => nice(d).replace(/^\w+, /, "");
     const stateLine = L => L.off ? (L.assumed ? `off by plan ${short(L.back)}` : `back ${short(L.back)}`) : L.overdue ? "overdue: chase it" : L.dueToday ? "due today" : L.last ? `${L.last[1].toLowerCase()} ${short(L.last[0])}` : L.next ? `starts ${short(L.next[0])}` : "waiting";
