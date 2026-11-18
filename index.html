@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lockout · a countdown lock screen for deadlines other people hold the keys to</title>
+<meta name="description" content="Your SUBMIT switch stays off until every keyholder takes their padlock off. A daily lock screen that shows whose key you are waiting on, when to nudge them, and flips ON when the last lock comes off.">
+<meta property="og:title" content="Lockout · a countdown lock screen">
+<meta property="og:description" content="5 of the 7 locks on this switch belong to someone else. Start theirs first.">
+<meta property="og:image" content="https://arshdwani.github.io/lockout-countdown/og.jpg">
+<meta name="theme-color" content="#14171c">
+<style>
+  :root { --bg: #14171c; --panel: #1c2027; --panel2: #232831; --line: #2d333d; --text: #eef1f4; --muted: #9aa3ad;
+    --y: #f4bd12; --r: #d4232b; --g: #35c46f; color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 400 17px/1.55 Archivo, system-ui, sans-serif; overflow-x: clip; }
+  a { color: var(--y); }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
+  .cond { font-stretch: 75%; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+  header.hero { padding: 52px 0 26px; background:
+    repeating-linear-gradient(-45deg, var(--y) 0 22px, #111 22px 44px) top / 100% 10px no-repeat,
+    radial-gradient(900px 420px at 75% 0%, rgba(244,189,18,.10), transparent 60%); }
+  .kick { color: var(--y); font-size: 15px; }
+  h1 { font-weight: 900; font-stretch: 125%; font-size: clamp(40px, 12.5vw, 118px); line-height: .92; letter-spacing: -.01em; margin: 12px 0 16px; text-transform: uppercase; }
+  h1 .dot { color: var(--r); }
+  .lede { font-size: clamp(18px, 2.2vw, 22px); color: #cfd5dc; max-width: 800px; margin: 0; }
+  .lede b { color: #fff; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 18px; color: var(--muted); font-size: 15px; }
+  .meta i { font-style: normal; color: var(--text); }
+
+  .studio { display: grid; grid-template-columns: minmax(280px, 390px) 1fr; gap: 42px; align-items: start; padding: 28px 0 44px; }
+  .phone { position: relative; width: 100%; aspect-ratio: 1290 / 2796; border-radius: 13% / 6%; background: #0b0c0e; padding: 3.2%;
+    box-shadow: 0 40px 90px -30px rgba(244,189,18,.22), 0 0 0 2px #333943 inset; }
+  .phone.android { aspect-ratio: 1080 / 2400; border-radius: 9% / 4.2%; }
+  .screen { position: relative; width: 100%; height: 100%; border-radius: 10.5% / 4.9%; overflow: hidden; background: #121519; }
+  .phone.android .screen { border-radius: 7% / 3.2%; }
+  .screen svg { display: block; width: 100%; height: 100%; }
+  .ios { position: absolute; inset: 0; pointer-events: none; color: #fff; text-align: center; font-family: -apple-system, "SF Pro Display", system-ui, sans-serif; }
+  .ios .isl { position: absolute; left: 35.3%; top: 1.2%; width: 29.3%; height: 4%; border-radius: 99px; background: #000; }
+  .ios .d { position: absolute; top: 7.2%; width: 100%; font-size: clamp(11px, 1.45vw, 16px); font-weight: 600; }
+  .ios .t { position: absolute; top: 9.2%; width: 100%; font-size: clamp(54px, 7.3vw, 84px); font-weight: 700; line-height: 1; letter-spacing: -.01em; }
+  .phone.android .ios { display: none; }
+
+  h2 { font-weight: 800; font-stretch: 75%; font-size: 15px; line-height: 1; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+  .block { margin-top: 26px; }
+  .scrub { display: flex; align-items: center; gap: 14px; }
+  .scrub input { flex: 1; accent-color: var(--y); height: 30px; min-width: 0; }
+  .btn { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); font-weight: 700; color: #fff; }
+  .btn:hover { border-color: #4a525e; }
+  .btn:focus-visible, .seg button:focus-visible { outline: 3px solid var(--y); outline-offset: 2px; }
+  .btn.primary { background: var(--y); color: #161200; border-color: var(--y); }
+  .btn[disabled] { opacity: .5; cursor: progress; }
+  .datebig { font-weight: 800; font-stretch: 75%; font-size: 34px; line-height: 1; text-transform: uppercase; min-width: 7.5em; }
+  .status { margin-top: 12px; color: #cfd5dc; }
+  .status b { color: #fff; }
+  .seg { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 4px; }
+  .seg button { all: unset; cursor: pointer; padding: 8px 14px; border-radius: 9px; font-weight: 700; color: var(--muted); }
+  .seg button[aria-pressed="true"] { background: var(--panel2); color: #fff; }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .small { font-size: 14px; color: var(--muted); }
+  .keys { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .key { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; border-top: 6px solid var(--r); }
+  .key.yours { border-top-color: var(--y); }
+  .key.off { border-top-color: var(--g); opacity: .75; }
+  .key .w { font-size: 12px; font-weight: 800; font-stretch: 75%; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .key .h { font-weight: 800; font-stretch: 75%; font-size: 21px; line-height: 1.15; color: #fff; }
+  .key .s { font-size: 14px; color: #cfd5dc; }
+
+  section { padding: 40px 0; border-top: 1px solid var(--line); }
+  .how { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 20px; }
+  .card h3 { margin: 0 0 6px; font-weight: 800; font-stretch: 75%; font-size: 24px; letter-spacing: .03em; text-transform: uppercase; }
+  .card p { margin: 0; color: #cfd5dc; }
+  .card .n { color: var(--y); font-weight: 900; font-stretch: 125%; }
+  table { width: 100%; border-collapse: collapse; font-size: 16px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-weight: 800; font-stretch: 75%; font-size: 14px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  td.d { white-space: nowrap; color: var(--muted); }
+  td .pill { display: inline-block; font-size: 12px; font-weight: 800; font-stretch: 75%; letter-spacing: .08em; padding: 1px 8px; border-radius: 99px; margin-right: 6px; vertical-align: 1px; }
+  .tablewrap { overflow-x: auto; }
+  form .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  label { display: grid; gap: 6px; font-size: 14px; color: var(--muted); min-width: 0; }
+  input, select, textarea { font: inherit; font-size: 16px; color: #fff; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-width: 0; width: 100%; }
+  textarea { min-height: 220px; font-family: ui-monospace, Menlo, monospace; font-size: 14px; line-height: 1.5; }
+  input:focus, select:focus, textarea:focus { outline: 3px solid var(--y); outline-offset: 1px; }
+  .lockrow { display: grid; grid-template-columns: 1.1fr 1.1fr .8fr 2.2fr .9fr auto; gap: 10px; align-items: end; padding: 12px; border-radius: 14px; background: #181b21; border: 1px solid var(--line); margin-top: 10px; }
+  .lockrow .del { all: unset; cursor: pointer; color: var(--muted); padding: 10px; border-radius: 8px; }
+  .lockrow .del:hover { color: #fff; background: var(--panel2); }
+  ol.steps { margin: 0; padding-left: 22px; color: #cfd5dc; }
+  ol.steps li { margin: 6px 0; }
+  code { font-family: ui-monospace, Menlo, monospace; font-size: .9em; background: var(--panel2); padding: 1px 6px; border-radius: 6px; }
+  footer { padding: 30px 0 50px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
+  @media (max-width: 900px) {
+    .studio { grid-template-columns: 1fr; }
+    .studio .phonecol { max-width: 340px; margin: 0 auto; width: 100%; }
+    .how { grid-template-columns: 1fr; }
+    form .grid { grid-template-columns: 1fr 1fr; }
+    .lockrow { grid-template-columns: 1fr 1fr; }
+    .lockrow .stamps { grid-column: span 2; }
+  }
+  @media (max-width: 520px) { .scrub { flex-wrap: wrap; } .scrub .datebig { order: -1; width: 100%; } form .grid { grid-template-columns: 1fr; } .datebig { font-size: 28px; min-width: 0; } }
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <div class="kick cond">Countdown lock screen · for deadlines other people hold the keys to</div>
+  <h1>Lockout<span class="dot">.</span></h1>
+  <p class="lede">In a factory, a machine can't be switched on until <b>every worker has taken their own padlock off the switch</b>, and nobody may remove someone else's lock. A grad school application works the same way: <b>5 of its 7 locks belong to someone else.</b> This lock screen shows whose key you're waiting on, tells you when to nudge them, and flips the switch to ON when the last lock comes off.</p>
+  <div class="meta" id="meta"></div>
+</div></header>
+
+<main class="wrap">
+  <div class="studio">
+    <div class="phonecol">
+      <div class="phone" id="phone"><div class="screen"><div id="main"></div><div class="ios" id="ios"><div class="isl"></div><div class="d" id="iosd"></div><div class="t" id="iost">9:41</div></div></div></div>
+    </div>
+    <div class="ctl">
+      <h2>Scrub the countdown</h2>
+      <div class="scrub"><button class="btn" id="play" aria-label="Play through the days">▶ Play</button><input type="range" id="day" aria-label="Day"><div class="datebig" id="dlabel"></div></div>
+      <div class="status" id="status" aria-live="polite"></div>
+      <div class="block">
+        <h2>The locks today</h2>
+        <div class="keys" id="keys"></div>
+      </div>
+      <div class="block row">
+        <div class="seg" role="group" aria-label="Device"><button id="dev-ios" aria-pressed="true">iPhone</button><button id="dev-and" aria-pressed="false">Android</button></div>
+        <label class="small" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="clockchk" checked style="width:auto"> Show the clock</label>
+      </div>
+      <div class="block row">
+        <button class="btn primary" id="dl1">Download this day (PNG)</button>
+        <button class="btn" id="dlall">Every day (.zip)</button>
+      </div>
+      <p class="small" id="dlnote">Opens on today's date. The images are drawn in your browser; nothing is uploaded.</p>
+    </div>
+  </div>
+
+  <section>
+    <h2>How it works</h2>
+    <div class="how">
+      <div class="card"><h3><span class="n">1</span> One switch</h3><p>The deadline is a switch held at OFF. It can only flip to ON when every padlock is off the lockout bar: the real rule from OSHA's lockout/tagout standard (29 CFR 1910.147).</p></div>
+      <div class="card"><h3><span class="n">2</span> One lock per keyholder</h3><p>Every milestone is a padlock with a tag. <b style="color:#ff6a6a">Red: their key</b> (recommenders, the registrar, ETS). <b style="color:var(--y)">Yellow: your key</b>. You can't take someone else's lock off, so their locks start first and get nudge days.</p></div>
+      <div class="card"><h3><span class="n">3</span> A new frame every day</h3><p>Rubber stamps track each lock (ordered, invited, nudged ×2), today's job lights up its lock, a flip counter counts down, and the switch turns ON the morning after you submit.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>The plan (worked out with Gemini)</h2>
+    <div class="tablewrap"><table id="locktable"></table></div>
+    <div class="block tablewrap"><table id="daytable"></table></div>
+  </section>
+
+  <section>
+    <h2>Hang your own locks</h2>
+    <form id="mine" onsubmit="return false">
+      <div class="grid">
+        <label>Deadline name<input name="goal" maxlength="40"></label>
+        <label>The switch says<select name="verb"><option>SUBMIT</option><option>APPLY</option><option>LAUNCH</option><option>SHIP</option><option>FILE</option><option>START</option></select></label>
+        <label>First day<input name="start" type="date" required></label>
+        <label>Your own date to flip it<input name="submit" type="date" required></label>
+        <label>Real deadline<input name="deadline" type="date" required></label>
+      </div>
+      <div id="lockrows"></div>
+      <div class="row block"><button class="btn" id="addlock" type="button">+ Add a lock</button><span class="small">Up to 7 locks. Stamps are dated words that show on the tag the day after, like <code>11/21 ASKED, 11/30 NUDGED</code>.</span></div>
+      <label class="block">One task a day (optional; empty days get a task from the locks)<textarea name="days" spellcheck="false"></textarea></label>
+    </form>
+    <div class="row block"><button class="btn primary" id="apply">Make my lockout</button><button class="btn" id="copy">Copy the link</button><button class="btn" id="reset">Back to the example</button><span class="small" id="copied" aria-live="polite"></span></div>
+    <p class="small">The whole plan lives in the link, so you can bookmark it or send it to a friend. Nothing is stored anywhere else.</p>
+  </section>
+
+  <section>
+    <h2>Change it every morning (iPhone)</h2>
+    <ol class="steps">
+      <li>Download <b>Every day (.zip)</b>, unzip it, and put the <code>Lockout</code> folder in <code>iCloud Drive/Shortcuts</code>.</li>
+      <li>Shortcuts → Automation → New → <b>Time of Day</b>, 6:00 AM, Daily, Run Immediately.</li>
+      <li>Actions: <b>Current Date</b> → <b>Format Date</b> (custom <code>yyyy-MM-dd</code>) → <b>Get File</b> <code>Lockout/[Formatted Date].png</code> → <b>Set Wallpaper Photo</b> (Lock Screen).</li>
+      <li>Settings → Notifications → Display As: <b>Count</b>, so notifications don't cover the tags.</li>
+    </ol>
+    <p class="small">On Android, set the day's PNG by hand, or use an automation app that changes the wallpaper on a schedule.</p>
+  </section>
+</main>
+
+<footer><div class="wrap">
+  Plan, daily tasks and the "start their locks first" ordering: worked out with Gemini. Lockout rule: OSHA 29 CFR 1910.147 (each worker applies and removes their own lock). ETS sends online score orders about 5 business days after the order. Type: Archivo and IBM Plex Mono (SIL Open Font License). Everything is drawn in the browser by one SVG generator, <code>lockout.js</code>. MIT licensed.
+</div></footer>
+
+<script src="fonts.js"></script>
+<script src="plan.js"></script>
+<script src="lockout.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const fst = document.createElement("style"); fst.textContent = FONT_CSS; document.head.appendChild(fst);
+  const { addDays, diff } = lockoutUtil;
+  const todayISO = () => { const d = new Date(); return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())).toISOString().slice(0, 10); };
+  const nice = s => new Date(s + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  const clone = o => JSON.parse(JSON.stringify(o));
+  const escH = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  let plan = clone(DEFAULT_PLAN), device = "ios", playing = null, custom = false;
+
+  // ---- plan <-> link ----
+  const b64e = o => btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+  const b64d = s => JSON.parse(decodeURIComponent(escape(atob(s))));
+  function readHash() {
+    const m = location.hash.match(/p=([^&]+)/); if (!m) return;
+    try { const o = b64d(decodeURIComponent(m[1]));
+      if (o && Array.isArray(o.locks) && o.locks.length && o.start && o.submit && o.deadline) { plan = o; custom = true; }
+    } catch (e) { /* bad link: keep the example */ }
+  }
+  readHash();
+
+  // ---- days ----
+  const first = () => addDays(plan.start, 0), last = () => addDays(plan.deadline, 1);
+  const dayInput = $("day");
+  function setRange(keep) {
+    const n = diff(first(), last()); dayInput.min = 0; dayInput.max = n;
+    if (!keep) { const t = diff(first(), todayISO()); dayInput.value = Math.max(0, Math.min(n, t)); }
+  }
+  const curDate = () => addDays(first(), +dayInput.value);
+  const dims = () => device === "ios" ? [1290, 2796] : [1080, 2400];
+
+  function draw() {
+    const date = curDate(), [W, H] = dims();
+    $("main").innerHTML = renderLockout({ plan, date, W, H });
+    $("phone").classList.toggle("android", device !== "ios");
+    $("ios").style.display = device === "ios" && $("clockchk").checked ? "" : "none";
+    $("iosd").textContent = new Date(date + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+    $("dlabel").textContent = nice(date);
+    const st = lockoutState(plan, date), V = (plan.verb || "SUBMIT").toLowerCase();
+    const back = st.locks.filter(l => l.off).length;
+    $("status").innerHTML = st.submitted ? `<b>Switch ON.</b> All ${st.locks.length} keys back; ${V} done on ${nice(plan.submit)}.`
+      : `<b>${st.submitDay ? `${V[0].toUpperCase() + V.slice(1)} today.` : `${st.toSubmit} day${st.toSubmit === 1 ? "" : "s"} to ${V}.`}</b> ${back} of ${st.locks.length} locks off · today: ${escH(st.task || "—")}`;
+    const stateLine = L => L.off ? `back ${nice(L.offDate)}` : L.offToday ? "comes off today" : L.last ? `${L.last[1].toLowerCase()} ${nice(L.last[0]).replace(/^\w+, /, "")}` : L.next ? `starts ${nice(L.next[0]).replace(/^\w+, /, "")}` : "waiting";
+    $("keys").innerHTML = st.locks.map(L => `<div class="key ${L.theirs ? "" : "yours"} ${L.off ? "off" : ""}"><div class="w">${L.off ? "Key back" : L.theirs ? "Their key" : "Your key"}${st.focus.has(L.id) && !L.off && !st.submitted ? " · today" : ""}</div><div class="h">${escH(L.holder)}</div><div class="s">${escH(L.what)} · ${escH(stateLine(L))}</div><div class="s" style="color:var(--muted)">off by ${nice(L.offDate)}</div></div>`).join("");
+  }
+
+  function buildMeta() {
+    const theirs = plan.locks.filter(l => l.theirs).length;
+    $("meta").innerHTML = `<span>${custom ? "Your plan" : "Example"}: <i>${escH(plan.goal || "Deadline")}</i></span><span>Flip by <i>${nice(plan.submit)}</i> · deadline <i>${nice(plan.deadline)}</i></span><span><i>${plan.locks.length} locks</i> · ${theirs} held by someone else</span>`;
+  }
+
+  function buildTables() {
+    let h = `<tr><th>#</th><th>Lock</th><th>Key</th><th>Stamps</th><th>Off by</th></tr>`;
+    plan.locks.forEach((L, k) => {
+      h += `<tr><td class="d">${k + 1}</td><td><b>${escH(L.holder)}</b> · ${escH(L.what)}</td><td><span class="pill" style="background:${L.theirs ? "#d4232b" : "#f4bd12"};color:${L.theirs ? "#fff" : "#161200"}">${L.theirs ? "THEIRS" : "YOURS"}</span></td>
+        <td>${(L.steps || []).map(s => `${nice(s[0]).replace(/^\w+, /, "")} ${escH(s[1].toLowerCase())}`).join(" · ")}</td><td class="d">${nice(L.off)}</td></tr>`;
+    });
+    $("locktable").innerHTML = h;
+    let d = `<tr><th>Day</th><th>Task</th><th>Counter</th></tr>`;
+    for (let x = plan.start; x <= plan.deadline; x = addDays(x, 1)) {
+      const st = lockoutState(plan, x);
+      d += `<tr><td class="d">${nice(x)}</td><td>${escH(st.task)}</td><td class="d">${st.submitted ? "switch ON" : st.submitDay ? (plan.verb || "submit").toLowerCase() + " today" : st.toSubmit + " to go"}</td></tr>`;
+    }
+    $("daytable").innerHTML = d;
+  }
+
+  // ---- editor ----
+  const md = s => { const d = new Date(s + "T12:00:00"); return `${d.getMonth() + 1}/${d.getDate()}`; };
+  function fromMD(t, start) {
+    const m = t.match(/^\s*(\d{1,2})\/(\d{1,2})\s*$/); if (!m) return null;
+    let y = +start.slice(0, 4); const mo = +m[1], da = +m[2];
+    if (mo < +start.slice(5, 7) - 2) y += 1;
+    const iso = `${y}-${String(mo).padStart(2, "0")}-${String(da).padStart(2, "0")}`;
+    return isNaN(new Date(iso + "T12:00:00")) ? null : iso;
+  }
+  function lockRow(L, k) {
+    return `<div class="lockrow" data-k="${k}">
+      <label>Keyholder<input name="holder" maxlength="14" value="${escH(L.holder)}"></label>
+      <label>What<input name="what" maxlength="18" value="${escH(L.what)}"></label>
+      <label>Whose key<select name="theirs"><option value="1"${L.theirs ? " selected" : ""}>Theirs</option><option value="0"${L.theirs ? "" : " selected"}>Yours</option></select></label>
+      <label class="stamps">Stamps<input name="steps" value="${escH((L.steps || []).map(s => md(s[0]) + " " + s[1]).join(", "))}"></label>
+      <label>Off by<input name="off" type="date" value="${L.off}"></label>
+      <button class="del" type="button" aria-label="Remove this lock">✕</button></div>`;
+  }
+  function fillForm() {
+    const f = $("mine");
+    f.goal.value = plan.goal || ""; f.verb.value = (plan.verb || "SUBMIT").toUpperCase();
+    f.start.value = plan.start; f.submit.value = plan.submit; f.deadline.value = plan.deadline;
+    $("lockrows").innerHTML = plan.locks.map(lockRow).join("");
+    f.days.value = Object.entries(plan.days || {}).map(([d, t]) => `${md(d)} ${t[0]}`).join("\n");
+    wireRows();
+  }
+  function wireRows() {
+    [...document.querySelectorAll(".lockrow .del")].forEach(b => b.onclick = () => { if (document.querySelectorAll(".lockrow").length > 1) b.parentElement.remove(); });
+  }
+  $("addlock").onclick = () => {
+    const n = document.querySelectorAll(".lockrow").length; if (n >= 7) return;
+    const f = $("mine");
+    $("lockrows").insertAdjacentHTML("beforeend", lockRow({ holder: "", what: "", theirs: true, steps: [], off: f.submit.value || plan.submit }, n));
+    wireRows();
+  };
+  const PAST = { SUBMIT: "SUBMITTED", APPLY: "APPLIED", LAUNCH: "LAUNCHED", SHIP: "SHIPPED", FILE: "FILED", START: "STARTED" };
+  function readForm() {
+    const f = $("mine");
+    if (!f.reportValidity()) return null;
+    const start = f.start.value, submit = f.submit.value, deadline = f.deadline.value;
+    if (!(start < submit && submit <= deadline)) { $("copied").textContent = "Dates must go: first day, then your flip date, then the real deadline."; return null; }
+    if (diff(start, deadline) > 120) { $("copied").textContent = "Keep it under 120 days."; return null; }
+    const locks = [...document.querySelectorAll(".lockrow")].map((r, k) => {
+      const q = n => r.querySelector(`[name=${n}]`).value.trim();
+      const steps = q("steps").split(",").map(x => x.trim()).filter(Boolean).map(x => { const m = x.match(/^(\d{1,2}\/\d{1,2})\s+(.+)$/); const d = m && fromMD(m[1], start); return d ? [d, m[2].toUpperCase().slice(0, 14)] : null; }).filter(Boolean).sort((a, b) => a[0] < b[0] ? -1 : 1);
+      return { id: "l" + (k + 1), holder: (q("holder") || `LOCK ${k + 1}`).toUpperCase(), what: (q("what") || "").toUpperCase(), theirs: q("theirs") === "1", off: q("off") || submit, steps };
+    }).sort((a, b) => a.off < b.off ? -1 : a.off > b.off ? 1 : 0);
+    const old = plan.days || {}, days = {};
+    f.days.value.split("\n").forEach(line => { const m = line.match(/^\s*(\d{1,2}\/\d{1,2})\s+(.+?)\s*$/); const d = m && fromMD(m[1], start);
+      if (d && d >= start && d <= deadline) { const t = m[2].slice(0, 34); days[d] = old[d] && old[d][0] === t && old[d].length > 1 ? old[d] : [t]; } });
+    const verb = f.verb.value;
+    return { goal: f.goal.value.trim() || "My deadline", verb, done: PAST[verb] || verb + "ED", start, submit, deadline, locks, days };
+  }
+
+  // ---- downloads ----
+  async function png(date) {
+    const [W, H] = dims();
+    const svg = renderLockout({ plan, date, W, H, fontCSS: FONT_CSS });
+    const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
+    const img = new Image(); img.decoding = "async";
+    await new Promise((ok, no) => { img.onload = ok; img.onerror = no; img.src = url; });
+    await new Promise(r => setTimeout(r, 80));
+    const c = document.createElement("canvas"); c.width = W; c.height = H;
+    c.getContext("2d").drawImage(img, 0, 0, W, H); URL.revokeObjectURL(url);
+    return new Promise(r => c.toBlob(r, "image/png"));
+  }
+  const save = (blob, name) => { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000); };
+  // minimal ZIP writer (stored, no compression)
+  const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  const crc32 = u => { let c = 0xFFFFFFFF; for (let i = 0; i < u.length; i++) c = CRC[(c ^ u[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+  function zip(files) {
+    const enc = new TextEncoder(), parts = [], central = []; let off = 0;
+    for (const f of files) {
+      const name = enc.encode(f.name), crc = crc32(f.data), size = f.data.length;
+      const h = new DataView(new ArrayBuffer(30)); h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint32(14, crc, true); h.setUint32(18, size, true); h.setUint32(22, size, true); h.setUint16(26, name.length, true);
+      parts.push(new Uint8Array(h.buffer), name, f.data);
+      const c = new DataView(new ArrayBuffer(46)); c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint32(16, crc, true); c.setUint32(20, size, true); c.setUint32(24, size, true); c.setUint16(28, name.length, true); c.setUint32(42, off, true);
+      central.push(new Uint8Array(c.buffer), name); off += 30 + name.length + size;
+    }
+    const cs = central.reduce((a, b) => a + b.length, 0), e = new DataView(new ArrayBuffer(22));
+    e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, cs, true); e.setUint32(16, off, true);
+    return new Blob([...parts, ...central, new Uint8Array(e.buffer)], { type: "application/zip" });
+  }
+  const dev = () => device === "ios" ? "iphone" : "android";
+  $("dl1").onclick = async () => { const b = $("dl1"); b.disabled = true; b.textContent = "Drawing…";
+    try { save(await png(curDate()), `lockout-${curDate()}-${dev()}.png`); } catch (e) { $("dlnote").textContent = "Couldn't draw the PNG in this browser. Try Chrome or Safari."; }
+    b.disabled = false; b.textContent = "Download this day (PNG)"; };
+  $("dlall").onclick = async () => { const b = $("dlall"); b.disabled = true;
+    try { const n = diff(first(), last()), files = [];
+      for (let i = 0; i <= n; i++) { b.textContent = `Drawing ${i + 1} of ${n + 1}…`;
+        const d = addDays(first(), i);
+        files.push({ name: `Lockout/${d}.png`, data: new Uint8Array(await (await png(d)).arrayBuffer()) }); }
+      save(zip(files), `lockout-${dev()}.zip`);
+    } catch (e) { $("dlnote").textContent = "Couldn't build the zip in this browser. Try Chrome or Safari."; }
+    b.disabled = false; b.textContent = "Every day (.zip)"; };
+
+  // ---- controls ----
+  dayInput.oninput = draw;
+  $("clockchk").onchange = draw;
+  const setDev = d => { device = d; $("dev-ios").setAttribute("aria-pressed", String(d === "ios")); $("dev-and").setAttribute("aria-pressed", String(d !== "ios")); draw(); };
+  $("dev-ios").onclick = () => setDev("ios");
+  $("dev-and").onclick = () => setDev("android");
+  $("play").onclick = () => {
+    if (playing) { clearInterval(playing); playing = null; $("play").textContent = "▶ Play"; return; }
+    if (+dayInput.value >= +dayInput.max) dayInput.value = dayInput.min;
+    $("play").textContent = "❚❚ Pause";
+    playing = setInterval(() => { if (+dayInput.value >= +dayInput.max) { clearInterval(playing); playing = null; $("play").textContent = "▶ Play"; return; } dayInput.value = +dayInput.value + 1; draw(); }, 600);
+  };
+  const link = () => location.href.split("#")[0] + (custom ? "#p=" + encodeURIComponent(b64e(plan)) : "");
+  $("apply").onclick = () => {
+    const p = readForm(); if (!p) return;
+    plan = p; custom = true; history.replaceState(null, "", "#p=" + encodeURIComponent(b64e(plan)));
+    buildMeta(); buildTables(); fillForm(); setRange(); draw(); $("copied").textContent = "Your lockout is ready. The link now holds your plan.";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  $("copy").onclick = async () => { try { await navigator.clipboard.writeText(link()); $("copied").textContent = "Copied."; } catch (e) { $("copied").textContent = "Copy the address bar instead."; } };
+  $("reset").onclick = () => { history.replaceState(null, "", location.pathname); plan = clone(DEFAULT_PLAN); custom = false; buildMeta(); buildTables(); fillForm(); setRange(); draw(); $("copied").textContent = ""; };
+
+  const tick = () => { const n = new Date(); $("iost").textContent = `${n.getHours() % 12 || 12}:${String(n.getMinutes()).padStart(2, "0")}`; };
+  tick(); setInterval(tick, 15000);
+  Promise.all([document.fonts.load("900 30px Archivo"), document.fonts.load('600 30px "IBM Plex Mono"')]).then(() => {
+    buildMeta(); buildTables(); fillForm(); setRange(); draw();
+  });
+})();
+</script>
+</body>
+</html>
