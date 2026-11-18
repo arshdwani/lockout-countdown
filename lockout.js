@@ -46,7 +46,7 @@
   const doneOf = plan => (plan.done || "SUBMITTED").toUpperCase();
   const cap = w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
   const title = w => w.toLowerCase().replace(/(^|[\s.\-])([a-z])/g, (m, a, b) => a + b.toUpperCase());
-  const VERBS = { ASKED: "Ask", NUDGED: "Nudge", "NUDGED ×2": "Nudge again", BOOKED: "Book", REQUESTED: "Request", ORDERED: "Order",
+  const VERBS = { ASKED: "Ask", NUDGED: "Nudge", "NUDGED 2×": "Nudge again", "NUDGED ×2": "Nudge again", BOOKED: "Book", REQUESTED: "Request", ORDERED: "Order",
     INVITED: "Invite", SENT: "Send to", CHECKED: "Check", EMAILED: "Email", CALLED: "Call", PAID: "Pay", SCHEDULED: "Schedule",
     REMINDED: "Remind", CONFIRMED: "Confirm", "PACKET SENT": "Send packet to", PINGED: "Ping", AGREED: "Ask" };
 
@@ -146,6 +146,15 @@
 
   // ---- the switch ----
   const CX = 645, CY = 1190, PW = 500, PH = 420, TAB_Y = CY + PH / 2 + 30;
+  function stationPlate(plan) {
+    const t = ("LOCKOUT STATION · " + (plan.goal || "")).toUpperCase();
+    const size = fit(t, 820, 28, 18, 800, "expanded");
+    const w = tw(t, size, 800, "expanded") + 2 * t.length + 120, x0 = CX - w / 2, y0 = 872;
+    return `<g filter="url(#ds2)"><rect x="${x0}" y="${y0}" width="${w}" height="58" rx="10" fill="#2a2f37"/></g>
+<rect x="${x0}" y="${y0}" width="${w}" height="58" rx="10" fill="none" stroke="#454c56" stroke-width="2"/>
+${screw(x0 + 26, y0 + 29, 40, 9)}${screw(x0 + w - 26, y0 + 29, 120, 9)}
+${T(CX, y0 + 39, t, { size, weight: 800, stretch: "expanded", anchor: "middle", fill: "#d9dee4", ls: 2 })}`;
+  }
   function switchPlate(st, plan) {
     const x0 = CX - PW / 2, y0 = CY - PH / 2;
     const on = st.submitted;
@@ -160,11 +169,10 @@
     s += `<rect x="${x0 + 18}" y="${y0 + 18}" width="${PW - 36}" height="${PH - 36}" rx="22" fill="none" stroke="#1a1600" stroke-opacity=".85" stroke-width="5"/>`;
     s += screw(x0 + 42, y0 + 42, 20) + screw(x0 + PW - 42, y0 + 42, 70) + screw(x0 + 42, y0 + PH - 42, 110) + screw(x0 + PW - 42, y0 + PH - 42, 160);
     // ON at 12 o'clock, OFF at 3 o'clock: the handle points at the word
-    s += T(CX, y0 + 52, "I  ON", { size: 34, weight: 900, stretch: "expanded", anchor: "middle", fill: ink, ls: 1, opacity: on ? 1 : .55 });
-    s += T(CX + 196, CY + 12, "OFF", { size: 32, weight: 900, stretch: "expanded", anchor: "middle", fill: ink, opacity: on ? .55 : 1 });
-    s += T(CX + 196, CY - 26, "O", { size: 30, weight: 900, stretch: "expanded", anchor: "middle", fill: ink, opacity: on ? .55 : 1 });
+    s += T(CX, y0 + 56, "ON", { size: 34, weight: 900, stretch: "expanded", anchor: "middle", fill: ink, ls: 2, opacity: on ? 1 : .5 });
+    s += T(CX + 184, CY + 11, "OFF", { size: 29, weight: 900, stretch: "expanded", anchor: "middle", fill: ink, opacity: on ? .5 : 1 });
     const lbl = verbOf(plan) + (plan.scope ? " · " + plan.scope : "");
-    s += T(CX, y0 + PH - 46, lbl, { size: fit(lbl, PW - 140, 26, 16, 900, "expanded"), weight: 900, stretch: "expanded", anchor: "middle", fill: ink, ls: 2 });
+    s += T(CX, y0 + PH - 54, lbl, { size: fit(lbl, PW - 210, 26, 16, 900, "expanded"), weight: 900, stretch: "expanded", anchor: "middle", fill: ink, ls: 2 });
     // pilot lamp: red = locked out, green = on
     const lx = x0 + 86, ly = y0 + 96;
     s += `<circle cx="${lx}" cy="${ly}" r="33" fill="#1c1d1f"/><circle cx="${lx}" cy="${ly}" r="33" fill="none" stroke="url(#steelH)" stroke-width="6"/>`;
@@ -175,7 +183,7 @@
     s += `<circle cx="${CX}" cy="${CY}" r="118" fill="#141619"/><circle cx="${CX}" cy="${CY}" r="118" fill="none" stroke="#000" stroke-opacity=".5" stroke-width="4"/><circle cx="${CX}" cy="${CY}" r="110" fill="none" stroke="#fff" stroke-opacity=".07" stroke-width="3"/>`;
     s += `<g transform="rotate(${ang} ${CX} ${CY})" filter="url(#ds2)">`;
     s += `<path d="M${CX - 66} ${CY - 28} L${CX + 96} ${CY - 36} Q${CX + 134} ${CY - 36} ${CX + 134} ${CY} Q${CX + 134} ${CY + 36} ${CX + 96} ${CY + 36} L${CX - 66} ${CY + 28} Q${CX - 90} ${CY} ${CX - 66} ${CY - 28} Z" fill="url(#handle)"/>`;
-    s += `<path d="M${CX - 48} ${CY - 20} L${CX + 100} ${CY - 28}" stroke="#fff" stroke-opacity=".35" stroke-width="5" stroke-linecap="round"/>`;
+    s += `<path d="M${CX - 48} ${CY - 20} L${CX + 96} ${CY - 28}" stroke="#fff" stroke-opacity=".35" stroke-width="5" stroke-linecap="round"/>`;
     s += `<path d="M${CX + 110} ${CY - 14} L${CX + 126} ${CY} L${CX + 110} ${CY + 14}" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`;
     s += `<circle cx="${CX}" cy="${CY}" r="66" fill="url(#hub)"/><circle cx="${CX}" cy="${CY}" r="66" fill="none" stroke="#5e080c" stroke-width="3"/>`;
     s += `<circle cx="${CX}" cy="${CY}" r="21" fill="url(#screw)"/>`;
@@ -184,7 +192,7 @@
   }
 
   // ---- bar, cables, locks, tags ----
-  const BAR_Y = 1570, BAR_H = 54, HOLE_Y = BAR_Y + 27, LOCK_Y = 1668, BODY_W = 112, BODY_H = 134, TAG_Y = 1820, TAG_W = 152, TAG_H = 262;
+  const BAR_Y = 1570, BAR_H = 54, HOLE_Y = BAR_Y + 27, LOCK_Y = 1668, BODY_W = 112, BODY_H = 134, TAG_Y = 1818, TAG_W = 154, TAG_H = 252;
   const lockX = (i, n) => 645 + (i - (n - 1) / 2) * Math.min(164, 1120 / Math.max(1, n - 1));
   function barSpan(n) { return [Math.min(lockX(0, n) - 93, 645 - 260), Math.max(lockX(n - 1, n) + 93, 645 + 260)]; }
 
@@ -217,79 +225,93 @@ ${[L, R].map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="10" fill="none" stroke="
     return `<path d="${d}" fill="none" stroke="#24282d" stroke-width="20" stroke-linecap="round"/><path d="${d}" fill="none" stroke="url(#steelH)" stroke-width="15" stroke-linecap="round"/>`;
   }
 
+  // what the lock guards, as a glanceable icon
+  function iconOf(L) {
+    if (L.icon) return L.icon;
+    const t = (L.what + " " + L.holder).toUpperCase();
+    if (/LETTER|REC|REFER/.test(t)) return "letter";
+    if (/TRANSCRIPT|RECORD/.test(t)) return "transcript";
+    if (/SCORE|TEST|GRE|TOEFL|EXAM/.test(t)) return "scores";
+    if (/SOP|ESSAY|STATEMENT|WRIT|DRAFT|RESUME|CV\b/.test(t)) return "pen";
+    if (/FORM|FEE|PAY|APPLICATION/.test(t)) return "forms";
+    return null;
+  }
+  function icon(kind, x, y, c) {
+    const st = `fill="none" stroke="${c}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"`;
+    switch (kind) {
+      case "letter": return `<rect x="${x - 30}" y="${y - 21}" width="60" height="42" rx="6" ${st}/><path d="M${x - 28} ${y - 17} L${x} ${y + 4} L${x + 28} ${y - 17}" ${st}/>`;
+      case "transcript": return `<path d="M${x - 21} ${y - 28} H${x + 8} L${x + 22} ${y - 14} V${y + 28} H${x - 21} Z" ${st}/><path d="M${x + 8} ${y - 28} V${y - 14} H${x + 22}" ${st}/><path d="M${x - 11} ${y - 1} H${x + 12} M${x - 11} ${y + 13} H${x + 12}" ${st}/>`;
+      case "scores": return `<path d="M${x - 28} ${y + 26} H${x + 28}" ${st}/><path d="M${x - 18} ${y + 18} V${y + 4} M${x} ${y + 18} V${y - 10} M${x + 18} ${y + 18} V${y - 24}" ${st} stroke-width="11" stroke-linecap="butt"/>`;
+      case "pen": return `<path d="M${x - 22} ${y + 24} L${x - 18} ${y + 8} L${x + 14} ${y - 24} L${x + 26} ${y - 12} L${x - 6} ${y + 20} Z" ${st}/><path d="M${x + 6} ${y - 16} L${x + 18} ${y - 4}" ${st}/>`;
+      case "forms": return `<rect x="${x - 22}" y="${y - 24}" width="44" height="54" rx="6" ${st}/><rect x="${x - 10}" y="${y - 31}" width="20" height="12" rx="3" fill="${c}"/><path d="M${x - 11} ${y - 2} l5 5 l9 -10 M${x - 11} ${y + 16} l5 5 l9 -10" ${st}/>`;
+    }
+    return "";
+  }
+
   function lockBody(x, L, today) {
     const x0 = x - BODY_W / 2, y0 = LOCK_Y, yours = !L.theirs;
+    const ink = yours ? "#1d1600" : "#fff";
     let s = `<g filter="url(#ds2)">${shackle(x)}`;
     s += `<rect x="${x0}" y="${y0}" width="${BODY_W}" height="${BODY_H}" rx="16" fill="url(#${yours ? "bodyYel" : "bodyRed"})"/>`;
     s += `<rect x="${x0}" y="${y0}" width="${BODY_W}" height="${BODY_H}" rx="16" fill="url(#gloss)"/></g>`;
     s += `<rect x="${x0 + 8}" y="${y0 + 7}" width="${BODY_W - 16}" height="7" rx="3.5" fill="#fff" opacity=".35"/>`;
-    s += T(x, y0 + 80, String(L.n), { size: 66, weight: 900, stretch: "normal", anchor: "middle", fill: yours ? "#1d1600" : "#fff", opacity: .92 });
+    const k = iconOf(L);
+    if (k) s += `<g opacity=".93">${icon(k, x, y0 + 56, ink)}</g>`;
+    else s += T(x, y0 + 80, String(L.n), { size: 66, weight: 900, stretch: "normal", anchor: "middle", fill: ink, opacity: .92 });
     if (today) {
-      // label-maker tape across the body
-      s += `<g transform="rotate(-7 ${x} ${y0 + 110})" filter="url(#ds2)"><rect x="${x - 66}" y="${y0 + 92}" width="132" height="38" rx="4" fill="${yours ? "#111" : YEL}"/>
-${T(x, y0 + 120, "TODAY", { size: 26, weight: 900, stretch: "expanded", anchor: "middle", fill: yours ? YEL : "#1b1500", ls: 2 })}</g>`;
+      s += `<g transform="rotate(-7 ${x} ${y0 + 112})" filter="url(#ds2)"><rect x="${x - 66}" y="${y0 + 94}" width="132" height="38" rx="4" fill="${yours ? "#111" : YEL}"/>
+${T(x, y0 + 122, "TODAY", { size: 26, weight: 900, stretch: "expanded", anchor: "middle", fill: yours ? YEL : "#1b1500", ls: 2 })}</g>`;
     } else {
-      s += `<circle cx="${x}" cy="${y0 + 110}" r="11" fill="#2a2d31"/><circle cx="${x}" cy="${y0 + 110}" r="7.5" fill="url(#screw)"/><rect x="${x - 1.6}" y="${y0 + 104}" width="3.2" height="12" fill="#2a2d31"/>`;
+      s += `<circle cx="${x}" cy="${y0 + 112}" r="11" fill="#2a2d31"/><circle cx="${x}" cy="${y0 + 112}" r="7.5" fill="url(#screw)"/><rect x="${x - 1.6}" y="${y0 + 106}" width="3.2" height="12" fill="#2a2d31"/>`;
     }
     return s;
   }
 
   function stampSvg(cx, cy, text, color, rot) {
-    const size = fit(text, TAG_W - 34, 27, 17, 800, "condensed");
-    const w = Math.min(TAG_W - 14, tw(text, size, 800, "condensed") + 24);
-    return `<g transform="translate(${cx},${cy}) rotate(${rot})" filter="url(#stamp)" opacity=".92">
-<rect x="${-w / 2}" y="-22" width="${w}" height="44" rx="6" fill="none" stroke="${color}" stroke-width="4"/>
+    const size = fit(text, TAG_W - 30, 30, 22, 800, "condensed");
+    const w = Math.min(TAG_W - 10, tw(text, size, 800, "condensed") + 22);
+    return `<g transform="translate(${cx},${cy}) rotate(${rot})" filter="url(#stamp)" opacity=".93">
+<rect x="${-w / 2}" y="-23" width="${w}" height="46" rx="6" fill="none" stroke="${color}" stroke-width="4"/>
 ${T(0, size * .36, text, { size, weight: 800, stretch: "condensed", anchor: "middle", fill: color, ls: .5 })}</g>`;
   }
 
-  function dateLine(x, y, word, date, color, wcolor) {
-    const w1 = tw(word, 19, 800, "condensed"), w2 = tw(md(date), 32, 900, "condensed"), gap = 7, start = x - (w1 + gap + w2) / 2;
-    return T(start, y, word, { size: 19, weight: 800, stretch: "condensed", fill: wcolor, ls: .5 }) +
-      T(start + w1 + gap, y, md(date), { size: 32, weight: 900, stretch: "condensed", fill: color });
-  }
-
-  function tagName(x, y0, L, fill, dim) {
-    const ks = fit(L.what, TAG_W - 16, 23, 15, 700, "condensed");
-    let s = T(x, y0 + 102, L.what, { size: ks, weight: 700, stretch: "condensed", anchor: "middle", fill: dim ? "#e9edf1" : "#545454", opacity: dim ? .55 : 1 });
-    const ns = fit(L.holder, TAG_W - 16, 46, 26, 900, "extra-condensed");
-    s += T(x, y0 + 148, L.holder, { size: ns, weight: 900, stretch: "extra-condensed", anchor: "middle", fill, opacity: dim ? .8 : 1 });
-    return s;
-  }
+  const tagHeader = (x, y0, text, bg, fg) => `<rect x="${x - TAG_W / 2}" y="${y0 + 32}" width="${TAG_W}" height="44" fill="${bg}"/>` +
+    T(x, y0 + 65, text, { size: fit(text, TAG_W - 12, 30, 22, 900, "condensed"), weight: 900, stretch: "condensed", anchor: "middle", fill: fg, ls: 1 });
+  const tagNameT = (x, y0, L, fill, op = 1) => T(x, y0 + 128, L.holder, { size: fit(L.holder, TAG_W - 14, 50, 30, 900, "extra-condensed"), weight: 900, stretch: "extra-condensed", anchor: "middle", fill, opacity: op });
+  const bigDate = (x, y, text, color) => T(x, y, text, { size: fit(text, TAG_W - 16, 44, 30, 900, "condensed"), weight: 900, stretch: "condensed", anchor: "middle", fill: color });
 
   function tag(x, L, st, date, i, plan) {
     const x0 = x - TAG_W / 2, y0 = TAG_Y, rot = [-2.2, 1.6, -1.2, 2.0, -1.8, 1.2, -2.6][i % 7];
     const yours = !L.theirs;
     let s = `<path d="M${x} ${LOCK_Y + BODY_H - 4} L${x} ${y0 + 22}" stroke="#15171a" stroke-width="6" stroke-linecap="round"/>`;
     s += `<g transform="rotate(${rot} ${x} ${y0 + 20})"><g filter="url(#ds2)"><rect x="${x0}" y="${y0}" width="${TAG_W}" height="${TAG_H}" rx="12" fill="#f5f2ea"/></g>`;
-    s += `<rect x="${x0}" y="${y0 + 34}" width="${TAG_W}" height="40" fill="${yours ? YEL : RED}"/>`;
-    s += T(x, y0 + 63, yours ? "YOUR KEY" : "THEIR KEY", { size: 25, weight: 900, stretch: "condensed", anchor: "middle", fill: yours ? "#1d1600" : "#fff", ls: 1.5 });
-    s += `<circle cx="${x}" cy="${y0 + 17}" r="11" fill="#c9a24a"/><circle cx="${x}" cy="${y0 + 17}" r="11" fill="none" stroke="#7d6020" stroke-width="2"/><circle cx="${x}" cy="${y0 + 17}" r="6" fill="#24262a"/>`;
-    s += tagName(x, y0, L, "#121212", false);
-    const sy = y0 + 194, srot = [-6, 5, -4, 6, -5, 4, -6][i % 7];
-    if (L.overdue) s += stampSvg(x, sy, "OVERDUE", INK_RED, srot);
-    else if (L.dueToday) s += stampSvg(x, sy, !L.theirs && L.due === plan.submit ? "SUBMIT TODAY" : "DUE TODAY", AMBER, srot);
-    else if (L.last) s += stampSvg(x, sy, L.last[1], /NUDGE|CALLED/.test(L.last[1]) ? INK_RED : (yours ? "#262626" : INK_BLUE), srot);
-    else if (L.next && L.next[0] === date) s += stampSvg(x, sy, "START TODAY", AMBER, srot);
-    else if (L.next) s += T(x, sy + 8, "STARTS " + md(L.next[0]), { size: 22, weight: 800, stretch: "condensed", anchor: "middle", fill: "#8a8a8a" });
-    s += `<line x1="${x0 + 12}" x2="${x0 + TAG_W - 12}" y1="${y0 + 223}" y2="${y0 + 223}" stroke="#d8d3c6" stroke-width="2"/>`;
-    s += dateLine(x, y0 + 252, "DUE", L.due, L.overdue ? INK_RED : "#141414", "#7a7a7a");
+    s += tagHeader(x, y0, yours ? "YOUR KEY" : "THEIR KEY", yours ? YEL : RED, yours ? "#1d1600" : "#fff");
+    s += `<circle cx="${x}" cy="${y0 + 16}" r="11" fill="#c9a24a"/><circle cx="${x}" cy="${y0 + 16}" r="11" fill="none" stroke="#7d6020" stroke-width="2"/><circle cx="${x}" cy="${y0 + 16}" r="6" fill="#24262a"/>`;
+    s += tagNameT(x, y0, L, "#121212");
+    const sy = y0 + 170, srot = [-6, 5, -4, 6, -5, 4, -6][i % 7];
+    if (L.last) s += stampSvg(x, sy, L.last[1], /NUDGE|CALLED/.test(L.last[1]) ? INK_RED : (yours ? "#262626" : INK_BLUE), srot);
+    else if (L.next && L.next[0] === date) s += stampSvg(x, sy, "START", AMBER, srot);
+    else if (L.next) s += T(x, sy + 10, "FROM " + md(L.next[0]), { size: 26, weight: 800, stretch: "condensed", anchor: "middle", fill: "#6f6f6f" });
+    s += `<line x1="${x0 + 12}" x2="${x0 + TAG_W - 12}" y1="${y0 + 202}" y2="${y0 + 202}" stroke="#d8d3c6" stroke-width="2"/>`;
+    if (L.overdue) s += bigDate(x, y0 + 240, "OVERDUE", INK_RED);
+    else if (L.dueToday) s += bigDate(x, y0 + 240, "TODAY", AMBER);
+    else s += bigDate(x, y0 + 240, md(L.due), "#141414");
     s += `</g>`;
     return s;
   }
 
   function ghost(x, L, i, cleared) {
-    const x0 = x - BODY_W / 2, r = 30;
-    let s = `<g>`;
+    const x0 = x - BODY_W / 2, r = 30, yours = !L.theirs;
+    let s = `<g opacity=".92">`;
     if (!cleared) s += `<path d="M${x - r} ${LOCK_Y + 8} V${HOLE_Y} a${r} ${r} 0 0 1 ${2 * r} 0 V${LOCK_Y + 8}" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="4" stroke-dasharray="9 8"/>`;
     s += `<rect x="${x0}" y="${LOCK_Y}" width="${BODY_W}" height="${BODY_H}" rx="16" fill="#fff" fill-opacity=".03" stroke="#fff" stroke-opacity=".22" stroke-width="4" stroke-dasharray="12 9"/>`;
     s += `<circle cx="${x}" cy="${LOCK_Y + 67}" r="38" fill="${GREEN}" fill-opacity=".14" stroke="${GREEN}" stroke-width="5"/>`;
     s += `<path d="M${x - 17} ${LOCK_Y + 68} l12 13 l24 -27" fill="none" stroke="${GREEN}" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>`;
-    s += `<rect x="${x - TAG_W / 2}" y="${TAG_Y}" width="${TAG_W}" height="${TAG_H}" rx="12" fill="#fff" fill-opacity=".03" stroke="#fff" stroke-opacity=".16" stroke-width="3" stroke-dasharray="10 8"/>`;
-    s += `<rect x="${x - TAG_W / 2}" y="${TAG_Y + 34}" width="${TAG_W}" height="40" fill="${GREEN}" fill-opacity=".16"/>`;
-    s += T(x, TAG_Y + 63, L.assumed ? "PLANNED" : "KEY BACK", { size: 25, weight: 900, stretch: "condensed", anchor: "middle", fill: GREEN, ls: 1.5 });
-    s += tagName(x, TAG_Y, L, "#e9edf1", true);
-    if (!L.assumed) s += stampSvg(x, TAG_Y + 194, L.theirs ? "RECEIVED" : "DONE", GREEN, [-6, 5, -4, 6, -5, 4, -6][i % 7]);
-    s += dateLine(x, TAG_Y + 252, L.assumed ? "OFF" : "BACK", L.back, GREEN, GREEN);
+    s += `<rect x="${x - TAG_W / 2}" y="${TAG_Y}" width="${TAG_W}" height="${TAG_H}" rx="12" fill="#fff" fill-opacity=".04" stroke="#fff" stroke-opacity=".2" stroke-width="3" stroke-dasharray="10 8"/>`;
+    s += tagHeader(x, TAG_Y, L.assumed ? "PLANNED" : yours ? "DONE" : "KEY BACK", "rgba(53,196,111,.18)", GREEN);
+    s += tagNameT(x, TAG_Y, L, "#eef1f4", .9);
+    if (!L.assumed) s += stampSvg(x, TAG_Y + 170, (yours ? "DONE " : "BACK ") + md(L.back), GREEN, [-6, 5, -4, 6, -5, 4, -6][i % 7]);
+    s += bigDate(x, TAG_Y + 240, md(L.due), GREEN);
     s += `</g>`;
     return s;
   }
@@ -308,71 +330,89 @@ ${T(0, size * .36, text, { size, weight: 800, stretch: "condensed", anchor: "mid
   }
 
   function clearedBanner(n) {
-    const y = 1505;
+    const y = 1556;
     return `<g opacity=".95">${T(645, y, "LOCKOUT CLEARED", { size: 74, weight: 900, stretch: "expanded", anchor: "middle", fill: GREEN, ls: 3 })}
 ${T(645, y + 52, `ALL ${n} KEYS BACK · SWITCH ON`, { size: 28, weight: 800, stretch: "expanded", anchor: "middle", fill: "#cfe9d9", ls: 3 })}</g>`;
   }
 
   // ---- board ----
   function flipDigits(x, y, str) {
-    const cw = 118, ch = 176, gap = 12;
+    const cw = 116, ch = 168, gap = 12;
     let s = "";
     [...str].forEach((c, k) => {
       const cx = x + k * (cw + gap);
       s += `<g filter="url(#ds2)"><rect x="${cx}" y="${y}" width="${cw}" height="${ch}" rx="14" fill="url(#flip)"/></g>`;
-      s += T(cx + cw / 2, y + ch / 2 + 54, c, { size: 150, weight: 800, stretch: "condensed", anchor: "middle", fill: "#f7f7f2" });
+      s += T(cx + cw / 2, y + ch / 2 + 52, c, { size: 146, weight: 800, stretch: "condensed", anchor: "middle", fill: "#f7f7f2" });
       s += `<rect x="${cx}" y="${y + ch / 2 - 2}" width="${cw}" height="4" fill="#0c0d0f"/>`;
       s += `<circle cx="${cx + 5}" cy="${y + ch / 2}" r="3" fill="#6d737b"/><circle cx="${cx + cw - 5}" cy="${y + ch / 2}" r="3" fill="#6d737b"/>`;
     });
     return { svg: s, w: str.length * cw + (str.length - 1) * gap };
   }
 
+  function rail(st, plan, date, x1, x2, y) {
+    const N = diff(plan.start, plan.deadline), X = d => x1 + (x2 - x1) * Math.max(0, Math.min(1, diff(plan.start, d) / N));
+    const tx = X(date), day = Math.max(1, Math.min(N + 1, diff(plan.start, date) + 1));
+    let s = `<line x1="${x1}" x2="${x2}" y1="${y}" y2="${y}" stroke="#3a4049" stroke-width="8" stroke-linecap="round"/>`;
+    s += `<line x1="${x1}" x2="${tx}" y1="${y}" y2="${y}" stroke="${st.submitted ? GREEN : YEL}" stroke-width="8" stroke-linecap="round"/>`;
+    st.locks.forEach(L => { s += `<circle cx="${X(L.due)}" cy="${y}" r="9" fill="${L.off ? GREEN : L.theirs ? RED : YEL}" stroke="#0f1114" stroke-width="3"/>`; });
+    const sx = X(plan.submit);
+    s += `<path d="M${sx} ${y - 22} V${y + 14}" stroke="${GREEN}" stroke-width="4"/><path d="M${sx} ${y - 22} h22 l-6 7 l6 7 h-22 Z" fill="${GREEN}"/>`;
+    s += `<rect x="${x2 - 4}" y="${y - 16}" width="8" height="32" rx="3" fill="${RED}"/>`;
+    s += `<circle cx="${tx}" cy="${y}" r="15" fill="#fff" stroke="#0f1114" stroke-width="4"/>`;
+    const lab = `DAY ${day} OF ${N + 1}`, lw = tw(lab, 26, 600, "normal", "IBM Plex Mono");
+    const lx = Math.max(x1 + lw / 2, Math.min(x2 - lw / 2, tx));
+    s += T(lx, y + 46, lab, { family: "IBM Plex Mono", size: 26, weight: 600, stretch: "normal", anchor: "middle", fill: "#e9edf1" });
+    const L1 = md(plan.start), L2 = "DEADLINE " + md(plan.deadline);
+    if (lx - lw / 2 > x1 + tw(L1, 24, 600, "normal", "IBM Plex Mono") + 24) s += T(x1, y + 46, L1, { family: "IBM Plex Mono", size: 24, weight: 600, stretch: "normal", fill: "#8b949e" });
+    if (lx + lw / 2 < x2 - tw(L2, 24, 600, "normal", "IBM Plex Mono") - 24) s += T(x2, y + 46, L2, { family: "IBM Plex Mono", size: 24, weight: 600, stretch: "normal", anchor: "end", fill: "#e2858a" });
+    return s;
+  }
+
   function board(st, plan, date) {
-    const x0 = 56, y0 = 2104, w = 1178, h = 344;
+    const x0 = 56, y0 = 2090, w = 1178, h = 392;
     const on = st.submitted, V = verbOf(plan);
-    const left = st.locks.filter(l => !l.off);
+    const left = st.locks.filter(l => !l.off), theirsLeft = left.filter(l => l.theirs).length;
     let s = `<g filter="url(#ds)"><rect x="${x0}" y="${y0}" width="${w}" height="${h}" rx="24" fill="#0f1114"/></g>`;
     s += `<rect x="${x0}" y="${y0}" width="${w}" height="${h}" rx="24" fill="none" stroke="url(#steelV)" stroke-width="6"/>`;
     s += `<path d="M${x0 + 3} ${y0 + 72} V${y0 + 24} a21 21 0 0 1 21 -21 H${x0 + w - 24} a21 21 0 0 1 21 21 V${y0 + 72} Z" fill="${on ? "#0f5e33" : st.blocked ? "#5a0b0f" : "#050506"}"/>`;
     if (on) {
       s += `<path d="M${x0 + 40} ${y0 + 38} l14 15 l28 -30" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>`;
-      const head = st.deadlineDay ? `DEADLINE TONIGHT · IN SINCE ${md(plan.submit)}` : `${doneOf(plan)} ${wmd(plan.submit)}`;
+      const early = diff(plan.submit, plan.deadline);
+      const head = `${doneOf(plan)} ${wmd(plan.submit)}${early > 0 ? ` · ${early} DAY${early === 1 ? "" : "S"} EARLY` : ""}`;
       s += T(x0 + 100, y0 + 52, head, { size: fit(head, w - 140, 34, 22, 900, "expanded"), weight: 900, stretch: "expanded", fill: "#fff", ls: 1.5 });
     } else {
       s += `<ellipse cx="${x0 + 136}" cy="${y0 + 38}" rx="118" ry="27" fill="${RED}"/>`;
       s += T(x0 + 136, y0 + 50, "DANGER", { size: 33, weight: 900, stretch: "expanded", anchor: "middle", fill: "#fff", ls: 2 });
-      const msg = st.blocked ? `${V} BLOCKED: ${left.length} LOCK${left.length === 1 ? "" : "S"} STILL ON` :
-        st.locks.length === 1 ? `DO NOT ${V} UNTIL THE LOCK IS OFF` : `DO NOT ${V} UNTIL ALL ${st.locks.length} LOCKS ARE OFF`;
+      let msg;
+      if (st.blocked) msg = `${V} BLOCKED: ${left.length} LOCK${left.length === 1 ? "" : "S"} STILL ON`;
+      else if (left.length && theirsLeft === 0 && st.submitDay) msg = `LAST LOCK IS YOURS: PAY, THEN ${V}`;
+      else if (left.length && theirsLeft === 0) msg = `ALL THEIR KEYS ARE BACK · FINISH YOURS`;
+      else msg = st.locks.length === 1 ? `DO NOT ${V} UNTIL THE LOCK IS OFF` : `DO NOT ${V} UNTIL ALL ${st.locks.length} LOCKS ARE OFF`;
       s += T(x0 + 274, y0 + 50, msg, { size: fit(msg, w - 300, 32, 20, 800, "condensed"), weight: 800, stretch: "condensed", fill: "#fff", ls: 1 });
     }
-    const by = y0 + 96;
+    const by = y0 + 92;
     let num, caption;
-    if (on) { const early = diff(plan.submit, plan.deadline); num = String(early); caption = early === 1 ? "DAY EARLY" : "DAYS EARLY"; }
+    if (on) { num = String(Math.max(0, st.toDeadline)); caption = st.toDeadline <= 0 ? "DEADLINE TONIGHT" : st.toDeadline === 1 ? "DAY TO DEADLINE" : "DAYS TO DEADLINE"; }
     else if (st.submitDay) { num = "0"; caption = V + " TODAY"; }
     else if (st.toSubmit < 0) { num = String(Math.max(0, st.toDeadline)); caption = "TO DEADLINE"; }
     else { num = String(st.toSubmit); caption = (st.toSubmit === 1 ? "DAY TO " : "DAYS TO ") + V; }
     const fd = flipDigits(x0 + 34, by, num.padStart(2, "0"));
     s += fd.svg;
-    s += T(x0 + 34 + fd.w / 2, by + 216, caption, { size: fit(caption, fd.w + 20, 25, 16, 800, "condensed"), weight: 800, stretch: "condensed", anchor: "middle", fill: YEL, ls: 2 });
+    s += T(x0 + 34 + fd.w / 2, by + 204, caption, { size: fit(caption, fd.w + 16, 27, 18, 800, "condensed"), weight: 800, stretch: "condensed", anchor: "middle", fill: YEL, ls: 1.5 });
     const tx = x0 + 34 + fd.w + 40;
-    s += `<line x1="${tx - 20}" x2="${tx - 20}" y1="${by}" y2="${by + 222}" stroke="#fff" stroke-opacity=".14" stroke-width="2"/>`;
-    s += T(tx, by + 24, "TODAY · " + wmd(date), { family: "IBM Plex Mono", size: 26, weight: 600, stretch: "normal", fill: YEL, ls: 1 });
+    s += `<line x1="${tx - 20}" x2="${tx - 20}" y1="${by}" y2="${by + 210}" stroke="#fff" stroke-opacity=".14" stroke-width="2"/>`;
+    s += T(tx, by + 26, "TODAY · " + wmd(date), { family: "IBM Plex Mono", size: 29, weight: 600, stretch: "normal", fill: YEL, ls: 1 });
     const maxW = x0 + w - 30 - tx;
     let size = 62, lines = wrap(st.task, maxW, size, 800, "condensed");
     while ((lines.length > 2 || lines.some(l => tw(l, size, 800, "condensed") > maxW)) && size > 36) { size -= 2; lines = wrap(st.task, maxW, size, 800, "condensed"); }
-    const ly = lines.length === 1 ? by + 98 : by + 82;
+    const ly = lines.length === 1 ? by + 100 : by + 84;
     lines.forEach((l, k) => { s += T(tx, ly + k * (size * 1.02), l, { size, weight: 800, stretch: "condensed", fill: "#fff" }); });
     const nd = addDays(date, 1), tmr = (plan.days || {})[nd] || (nd <= plan.deadline ? [autoTask(plan, nd)] : null);
-    if (lines.length === 1 && tmr && tmr[0]) {
-      const nt = "NEXT · " + tmr[0];
-      s += T(tx, by + 158, nt, { family: "IBM Plex Mono", size: fit(nt, maxW, 26, 17, 600, "normal", "IBM Plex Mono"), weight: 600, stretch: "normal", fill: "#d5dbe1" });
+    if (lines.length === 1) {
+      const nt = tmr && tmr[0] ? "NEXT · " + tmr[0] : date >= plan.deadline ? "NEXT · Rest. You're done." : "";
+      if (nt) s += T(tx, by + 166, nt, { family: "IBM Plex Mono", size: fit(nt, maxW, 28, 18, 600, "normal", "IBM Plex Mono"), weight: 600, stretch: "normal", fill: "#d5dbe1" });
     }
-    const theirsLeft = left.filter(l => l.theirs).length, yoursLeft = left.length - theirsLeft;
-    let foot;
-    if (on) foot = `ALL ${st.locks.length} KEYS BACK · DEADLINE ${wmd(plan.deadline)}`;
-    else if (left.length && theirsLeft === 0) foot = `ALL THEIR KEYS BACK · ${yoursLeft} LEFT, YOURS · DUE ${md(plan.deadline)}`;
-    else foot = `STILL ON: ${theirsLeft} THEIRS, ${yoursLeft} YOURS · DEADLINE ${md(plan.deadline)}`;
-    s += T(tx, by + 214, foot, { family: "IBM Plex Mono", size: fit(foot, maxW, 24, 15, 600, "normal", "IBM Plex Mono"), weight: 600, stretch: "normal", fill: "#aeb6bf", ls: .3 });
+    s += rail(st, plan, date, x0 + 60, x0 + w - 60, y0 + 318);
     return s;
   }
 
@@ -380,6 +420,7 @@ ${T(645, y + 52, `ALL ${n} KEYS BACK · SWITCH ON`, { size: 28, weight: 800, str
     const st = stateFor(plan, date);
     const n = st.locks.length;
     let body = background();
+    body += stationPlate(plan);
     if (!st.submitted) body += cables(n);
     body += switchPlate(st, plan);
     if (!st.submitted) body += bar(n); else body += clearedBanner(n);
