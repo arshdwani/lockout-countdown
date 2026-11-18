@@ -5,7 +5,11 @@
 const DEFAULT_PLAN = {
   goal: "Grad school applications",
   scope: "6 PROGRAMS",
-  icons: true,
+  verb: "COMPLETE",                  // the switch: the application is complete when every lock is off
+  done: "COMPLETE",
+  rule: "APPLICATION NOT COMPLETE UNTIL ALL {n} LOCKS ARE OFF",
+  lastLock: "LAST LOCK IS YOURS: PAY AND SUBMIT",
+  submitLabel: "SUBMIT",
   start: "2026-11-19",
   submit: "2026-12-13",          // internal submit: the switch flips ON
   deadline: "2026-12-15",        // the real deadline (11:59 pm)
@@ -21,7 +25,7 @@ const DEFAULT_PLAN = {
       steps: [["2026-10-15", "AGREED"], ["2026-11-21", "SENT"], ["2026-11-22", "INVITED"], ["2026-11-29", "CHECKED"], ["2026-11-30", "NUDGED"]] },
     { id: "oka", holder: "OKAFOR", what: "LETTER ×6", theirs: true, due: "2026-12-11", back: "2026-12-09",
       steps: [["2026-10-15", "AGREED"], ["2026-11-21", "SENT"], ["2026-11-22", "INVITED"], ["2026-11-29", "CHECKED"], ["2026-12-01", "NUDGED"], ["2026-12-07", "NUDGED 2×"]] },
-    { id: "pat", holder: "PATEL", what: "LETTER ×6", theirs: true, due: "2026-12-11", back: "2026-12-11",
+    { id: "pat", holder: "PATEL", what: "LETTER ×6", theirs: true, due: "2026-12-11", back: "2026-12-12",
       steps: [["2026-10-15", "AGREED"], ["2026-11-21", "SENT"], ["2026-11-22", "INVITED"], ["2026-11-29", "CHECKED"], ["2026-12-02", "NUDGED"], ["2026-12-08", "NUDGED 2×"]] },
     { id: "cv", holder: "FORMS", what: "CV · FEES", icon: "forms", theirs: false, due: "2026-12-13", back: "2026-12-13",
       steps: [["2026-11-23", "CV DONE"], ["2026-12-05", "FORMS 3/6"], ["2026-12-06", "FORMS 6/6"]] },

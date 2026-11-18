@@ -138,7 +138,7 @@
   <section>
     <h2>How it works</h2>
     <div class="how">
-      <div class="card"><h3><span class="n">1</span> One switch</h3><p>The deadline is a switch held at OFF. It can only flip to ON when every padlock is off the lockout bar: the real rule from OSHA's lockout/tagout standard (29 CFR 1910.147).</p></div>
+      <div class="card"><h3><span class="n">1</span> One switch</h3><p>Your application is a switch held at OFF. It only flips to ON (complete) when every padlock is off the lockout bar: the real rule from OSHA's lockout/tagout standard (29 CFR 1910.147), where each worker removes only their own lock.</p></div>
       <div class="card"><h3><span class="n">2</span> One lock per keyholder</h3><p>Every milestone is a padlock with a tag. <b style="color:#ff6a6a">Red: their key</b> (recommenders, the registrar, ETS). <b style="color:var(--y)">Yellow: your key</b>. You can't take someone else's lock off, so their locks start first and get nudge days.</p></div>
       <div class="card"><h3><span class="n">3</span> A new frame every day</h3><p>Rubber stamps track each lock (ordered, invited, nudged ×2), today's lock gets a TODAY tape, a lock reads DUE TODAY on its date and OVERDUE after it, and comes off only when you enter the day its key came back. The switch turns ON after you submit.</p></div>
     </div>
@@ -156,7 +156,7 @@
     <form id="mine" onsubmit="return false">
       <div class="grid">
         <label>Deadline name<input name="goal" maxlength="40"></label>
-        <label>The switch says<select name="verb"><option>SUBMIT</option><option>APPLY</option><option>LAUNCH</option><option>SHIP</option><option>FILE</option><option>START</option></select></label>
+        <label>The switch says<select name="verb"><option>COMPLETE</option><option>SUBMIT</option><option>APPLY</option><option>LAUNCH</option><option>SHIP</option><option>FILE</option><option>START</option></select></label>
         <label>First day<input name="start" type="date" required></label>
         <label>Your own date to flip it<input name="submit" type="date" required></label>
         <label>Real deadline<input name="deadline" type="date" required></label>
@@ -294,7 +294,7 @@
     $("lockrows").insertAdjacentHTML("beforeend", lockRow({ holder: "", what: "", theirs: true, steps: [], due: f.submit.value || plan.submit, back: "" }, n));
     wireRows();
   };
-  const PAST = { SUBMIT: "SUBMITTED", APPLY: "APPLIED", LAUNCH: "LAUNCHED", SHIP: "SHIPPED", FILE: "FILED", START: "STARTED" };
+  const PAST = { COMPLETE: "COMPLETE", SUBMIT: "SUBMITTED", APPLY: "APPLIED", LAUNCH: "LAUNCHED", SHIP: "SHIPPED", FILE: "FILED", START: "STARTED" };
   function readForm() {
     const f = $("mine");
     if (!f.reportValidity()) return null;
