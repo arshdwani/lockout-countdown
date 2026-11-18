@@ -394,7 +394,7 @@ ${T(645, y + 52, `ALL ${n} LOCKS OFF · SWITCH ON`, { size: 28, weight: 800, str
     if (on) {
       s += `<path d="M${x0 + 40} ${y0 + 38} l14 15 l28 -30" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>`;
       const early = diff(plan.submit, plan.deadline);
-      const head = st.deadlineDay ? `${doneOf(plan)} SINCE ${md(plan.submit)} · DUE TONIGHT` : `${doneOf(plan)} ${wmd(plan.submit)}${early > 0 ? ` · ${early} DAY${early === 1 ? "" : "S"} EARLY` : ""}`;
+      const head = st.deadlineDay ? `${doneOf(plan)} SINCE ${md(plan.submit)} · DEADLINE TONIGHT` : `${doneOf(plan)} ${wmd(plan.submit)}${early > 0 ? ` · ${early} DAY${early === 1 ? "" : "S"} EARLY` : ""}`;
       s += T(x0 + 100, y0 + 52, head, { size: fit(head, w - 140, 34, 22, 900, "expanded"), weight: 900, stretch: "expanded", fill: "#fff", ls: 1.5 });
     } else {
       s += `<ellipse cx="${x0 + 136}" cy="${y0 + 38}" rx="118" ry="27" fill="${RED}"/>`;
